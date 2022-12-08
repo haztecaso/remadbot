@@ -3,6 +3,7 @@
 from enum import Enum
 from time import sleep
 
+from random import random
 import argparse
 import sys
 import logging
@@ -202,37 +203,36 @@ def parse_item(r_item: dict):
 def filter_pub_bicileta(i: Item) -> bool:
     return (
         i.state == State.PUB
-        and i.category.id_ not in [10, 11, 19]
+        # and i.category.id_ not in [10, 11, 19]
         and ("bici" in i.name.lower() or "ciclo" in i.name.lower())
     )
 
 
 def save_sent_ids(config: Config, ids: Iterable[int]):
     with open(config.db_file, "a") as dbfile:
-        dbfile.writelines(map(str, ids))
+        dbfile.writelines(map(lambda id: str(id)+'\n', ids))
 
 
-def read_sent_ids(config:Config) -> Iterable[int]:
+def read_sent_ids(config:Config) -> list[int]:
     if not Path(f"./{config.db_file}").is_file():
         return []
     with open(config.db_file, "r") as dbfile:
         ids = dbfile.readlines()
-    return map(int, ids)
+    return [int(id) for id in ids]
 
 
-def filter_not_sent(sent: Iterable[int]) -> Callable[[Item], bool]:
+def filter_not_sent(sent: list[int]) -> Callable[[Item], bool]:
     def f(i: Item) -> bool:
         return not i.id_ in sent
-
     return f
 
 msg_send_count = 0
 def wait_send():
     global msg_send_count
-    sleep(1.05)
+    sleep(1.05+.95*random())
     msg_send_count += 1
     if msg_send_count % 20 == 0:
-        sleep(40) # Avoid sending more than 20 messages per minute
+        sleep(40+20*random()) # Avoid sending more than 20 messages per minute
 
 def send_items(config: Config, items: list[Item]):
     bot = telegram.Bot(token=config.telegram_bot_token)
@@ -262,7 +262,6 @@ def main():
     bici_items = filter(filter_pub_bicileta, items)
     bici_items_not_sent = list(filter(filter_not_sent(sent), bici_items))
     send_items(config, bici_items_not_sent)
-
 
 if __name__ == "__main__":
     main()
