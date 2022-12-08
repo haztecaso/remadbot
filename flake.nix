@@ -1,5 +1,6 @@
 {
-  description = "Bot para recibir avisos de los eventos de jobo.";
+  description = "Bot de telegram que envía avisos sobre nuevas bicicletas en el servicio de intercambio de objetos del ayuntamiento de Madrid, ReMAD.";
+
 
   inputs.nixpkgs.url = "github:nixos/nixpkgs";
 
@@ -14,7 +15,7 @@
         python-telegram-bot
     ];
 
-    jobo_bot = {lib, python310Packages}: python310Packages.buildPythonPackage rec {
+    remadbot = {lib, python310Packages}: python310Packages.buildPythonPackage rec {
       pname = "remadbot";
       version = "0.1.0";
 
@@ -23,26 +24,26 @@
       propagatedBuildInputs = requirements python310Packages;
 
       meta = {
-        homepage = "https://github.com/haztecaso/jobo_bot";
-        description = "Bot para recibir avisos de los eventos de jobo";
+        homepage = "https://github.com/haztecaso/remadbot";
+        description = "Bot de telegram que envía avisos sobre nuevas bicicletas en el servicio de intercambio de objetos del ayuntamiento de Madrid, ReMAD.";
         license = lib.licenses.gpl3;
       };
     };
   in rec {
     packages = forAllSystems (system: {
-      jobo_bot = nixpkgs.legacyPackages.${system}.callPackage jobo_bot { };
+      remadbot = nixpkgs.legacyPackages.${system}.callPackage remadbot { };
     });
 
-    defaultPackage = forAllSystems (system: packages.${system}.jobo_bot);
+    defaultPackage = forAllSystems (system: packages.${system}.remadbot);
 
     nixosModule = { config, lib, pkgs, ... }:
     let
-      cfg = config.services.jobo_bot;
-      pkg = pkgs.callPackage jobo_bot {};
+      cfg = config.services.remadbot;
+      pkg = pkgs.callPackage remadbot {};
     in
     {
-      options.services.jobo_bot = with lib;{
-        enable = mkEnableOption "jobo_bot service";
+      options.services.remadbot = with lib;{
+        enable = mkEnableOption "remadbot service";
         frequency = mkOption {
           type = types.int;
           default = 30;
@@ -55,7 +56,7 @@
         };
         configFile = mkOption {
           type = types.path;
-          description = "path of jobo_bot.json config file."; 
+          description = "path of remadbot config.json config file."; 
         };
       };
       config = lib.mkIf cfg.enable {
@@ -67,7 +68,7 @@
             conf = "--conf ${cfg.configFile}";
             prod = if cfg.prod then "--prod" else "";
           in [
-            ''*/${freq} * * * *  root .  /etc/profile; ${pkg}/bin/jobo_bot ${conf} ${prod}''
+            ''*/${freq} * * * *  root .  /etc/profile; ${pkg}/bin/remadbot ${conf} ${prod}''
           ];
         };
       };
@@ -77,12 +78,12 @@
       nativeBuildInputs = with nixpkgs.legacyPackages.${system};
         requirements python310Packages ++ [ jq fx python310Packages.black ];
       shellHook = ''
-        alias jobo_bot_="python jobo_bot"
+        alias remadbot="python remadbot"
       '';
     });
 
     overlay = final: prev: {
-      jobo_bot = final.callPackage jobo_bot {};
+      remadbot = final.callPackage remadbot {};
     };
   };
 }
