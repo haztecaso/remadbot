@@ -1,0 +1,16 @@
+{
+    "prod": {
+        "db_file": "sent_items.db",
+        "telegram": {
+            "bot_token": "",
+            "chat_id": ""
+        }
+    },
+    "dev": {
+        "db_file": "sent_items.dev.db",
+        "telegram": {
+            "bot_token": "",
+            "chat_id": ""
+        }
+    }
+}
