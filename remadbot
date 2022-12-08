@@ -237,7 +237,7 @@ def wait_send():
 def send_items(config: Config, items: list[Item]):
     bot = telegram.Bot(token=config.telegram_bot_token)
     for item in items:
-        logger.info(f"Sending item '{item.name}' with id={item.id_} and file_id={item.file_id}")
+        logger.info(f"Sending item '{item.name}' with id={item.id_}, file_id={item.file_id}, category.id={item.category.id_}")
         bot.send_photo(photo = item.file_url, caption = item.telegram_message, **config.telegram_send_conf)
         # bot.send_message(text=item.telegram_message, **config.telegram_send_conf)
         save_sent_ids(config, [item.id_])
