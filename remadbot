@@ -203,7 +203,7 @@ def parse_item(r_item: dict):
 def filter_pub_bicileta(i: Item) -> bool:
     return (
         i.state == State.PUB
-        # and i.category.id_ not in [10, 11, 19]
+        and i.category.id_ not in [10, 11, 19]
         and ("bici" in i.name.lower() or "ciclo" in i.name.lower())
     )
 
