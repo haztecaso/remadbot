@@ -201,10 +201,13 @@ def parse_item(r_item: dict):
 
 
 def filter_pub_bicileta(i: Item) -> bool:
+    name = i.name.lower()
+    desc = i.description.lower()
     return (
-        i.state == State.PUB
-        and i.category.id_ not in [10, 11, 19]
-        and ("bici" in i.name.lower() or "ciclo" in i.name.lower())
+        i.state == State.PUB and 
+        i.category.id_ not in [10, 11, 19] and 
+        ("bici" in name or "ciclo" in name) and 
+        ("casco" not in name or "triciclo" not in desc)
     )
 
 
@@ -260,6 +263,8 @@ def main():
     items = [parse_item(raw_item) for raw_item in raw_data]
     sent = read_sent_ids(config)
     bici_items = filter(filter_pub_bicileta, items)
+    for i in bici_items:
+        print(i)
     bici_items_not_sent = list(filter(filter_not_sent(sent), bici_items))
     send_items(config, bici_items_not_sent)
 
